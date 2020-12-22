@@ -11,19 +11,19 @@ import (
 	"path"
 )
 
-func DownloadImgs(file_dir *string, tag *string, pageNum *int) {
+func DownloadImgs(file_dir *string, tag *string,start *int ,pageNum *int) {
 	client := &http.Client{}
 	resp_chan := make(chan *http.Response)
 	wait := make(chan interface{})
 
-	resp_chan = Rer(*pageNum, *tag, client, resp_chan)
+	resp_chan = Rer(start,pageNum, *tag, client, resp_chan)
 	Der(resp_chan,file_dir,wait)
 	//<-wait
 }
 
 
-func Rer(pageNum int, tag string, client *http.Client, resp_chan chan *http.Response) chan *http.Response {
-	for i := 1; i < pageNum+1; i++ {
+func Rer(start *int,pageNum *int, tag string, client *http.Client, resp_chan chan *http.Response) chan *http.Response {
+	for i := *start; i < *pageNum+1; i++ {
 		pageUrl := fmt.Sprintf(`http://m.bcoderss.com/tag/%s/page/%d/`, tag, i)
 		resp, err := tools.Request0("POST", pageUrl, client)
 		if err != nil {
@@ -54,7 +54,7 @@ func Der(resp_chan chan *http.Response,dir *string,wait chan interface{}) {
 			url := resp.Request.URL.String()
 			name := path.Base(url)
 			directory := getDirectory(dir)
-			img_path := directory + name
+			img_path := directory +"/" + name
 			downloadImg(resp, nil, img_path)
 		}(each)
 	}
@@ -62,7 +62,7 @@ func Der(resp_chan chan *http.Response,dir *string,wait chan interface{}) {
 }
 
 func getDirectory(dir *string) string {
-	directory := fmt.Sprintf("/Users/tomjack/Desktop/parse/%s", *dir)
+	directory := fmt.Sprintf("/Users/tomjack/Pictures/%s", *dir)
 	_, err := os.Stat(directory)
 	if err != nil {
 		err = os.Mkdir(directory, os.ModePerm)
