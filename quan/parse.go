@@ -23,27 +23,29 @@ func DownloadImgs(file_dir *string, tag *string,start *int ,pageNum *int) {
 
 
 func Rer(start *int,pageNum *int, tag string, client *http.Client, resp_chan chan *http.Response) chan *http.Response {
-	for i := *start; i < *pageNum+1; i++ {
-		pageUrl := fmt.Sprintf(`http://m.bcoderss.com/tag/%s/page/%d/`, tag, i)
-		resp, err := tools.Request0("POST", pageUrl, client)
-		if err != nil {
-			panic("erro in the page request.")
-		}
-
-		urls := tools.GenUrlsFromPage(resp, err) //生成每一页爬取的urls
-
-		go func() {
-			for _, each_url := range urls {
-				func(url *[]byte) {
-					resp, err := tools.Request0("GET", string(*url), client)
-					if err != nil {
-						log.Fatal(err)
-					}
-					resp_chan <- resp
-				}(&each_url)
+	go func() {
+		for i := *start; i < *pageNum+1; i++ {
+			pageUrl := fmt.Sprintf(`http://m.bcoderss.com/tag/%s/page/%d/`, tag, i)
+			resp, err := tools.Request0("POST", pageUrl, client)
+			if err != nil {
+				panic("erro in the page request.")
 			}
-		}()
-	}
+	
+			urls := tools.GenUrlsFromPage(resp, err) //生成每一页爬取的urls
+
+			go func() {
+				for _, each_url := range urls {
+					func(url *[]byte) {
+						resp, err := tools.Request0("GET", string(*url), client)
+						if err != nil {
+							log.Fatal(err)
+						}
+						resp_chan <- resp
+					}(&each_url)
+				}
+			}()
+		}
+	}()
 	return resp_chan
 }
 
