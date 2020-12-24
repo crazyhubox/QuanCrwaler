@@ -11,18 +11,17 @@ import (
 	"path"
 )
 
-func DownloadImgs(file_dir *string, tag *string,start *int ,pageNum *int) {
+func DownloadImgs(file_dir *string, tag *string, start *int, pageNum *int) {
 	client := &http.Client{}
 	resp_chan := make(chan *http.Response)
 	wait := make(chan interface{})
 
-	resp_chan = Rer(start,pageNum, *tag, client, resp_chan)
-	Der(resp_chan,file_dir,wait)
-	//<-wait
+	resp_chan = Rer(start, pageNum, *tag, client, resp_chan)
+	Der(resp_chan, file_dir, wait)
+
 }
 
-
-func Rer(start *int,pageNum *int, tag string, client *http.Client, resp_chan chan *http.Response) chan *http.Response {
+func Rer(start *int, pageNum *int, tag string, client *http.Client, resp_chan chan *http.Response) chan *http.Response {
 	go func() {
 		for i := *start; i < *pageNum+1; i++ {
 			pageUrl := fmt.Sprintf(`http://m.bcoderss.com/tag/%s/page/%d/`, tag, i)
@@ -30,7 +29,7 @@ func Rer(start *int,pageNum *int, tag string, client *http.Client, resp_chan cha
 			if err != nil {
 				panic("erro in the page request.")
 			}
-	
+
 			urls := tools.GenUrlsFromPage(resp, err) //生成每一页爬取的urls
 
 			go func() {
@@ -49,18 +48,17 @@ func Rer(start *int,pageNum *int, tag string, client *http.Client, resp_chan cha
 	return resp_chan
 }
 
-func Der(resp_chan chan *http.Response,dir *string,wait chan interface{}) {
+func Der(resp_chan chan *http.Response, dir *string, wait chan interface{}) {
 	for each := range resp_chan {
 		go func(resp *http.Response) {
 			fmt.Println("start download.")
 			url := resp.Request.URL.String()
 			name := path.Base(url)
 			directory := getDirectory(dir)
-			img_path := directory +"/" + name
+			img_path := directory + "/" + name
 			downloadImg(resp, nil, img_path)
 		}(each)
 	}
-
 }
 
 func getDirectory(dir *string) string {
@@ -77,7 +75,6 @@ func getDirectory(dir *string) string {
 	return directory
 }
 
-
 func downloadImg(resp *http.Response, err error, imgPath string) {
 	if err != nil {
 		//println(err)
@@ -90,6 +87,6 @@ func downloadImg(resp *http.Response, err error, imgPath string) {
 	writer := bufio.NewWriter(file)
 	written, _ := io.Copy(writer, reader)
 	// 输出文件字节大小
-	fmt.Printf("Total length: %d[%s]\n", written,resp.Request.URL)
+	fmt.Printf("Total length: %d[%s]\n", written, resp.Request.URL)
 	defer resp.Body.Close()
 }
