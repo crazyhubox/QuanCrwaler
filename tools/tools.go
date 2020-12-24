@@ -8,22 +8,6 @@ import (
 	"regexp"
 )
 
-//func main() {
-//	client := &http.Client{}
-//	method := "POST"
-//	url_eachPage := "http://m.bcoderss.com/tag/%e7%be%8e%e5%a5%b3/page/1/"
-//
-//	resp, err := Request0(method, url_eachPage, client)
-//	if err != nil {
-//		log.Fatal(err)
-//	}
-//
-//	urls:= GenUrlsFromPage(resp, err)
-//
-//	for _,each_url:= range urls{
-//		fmt.Printf("%s\n",each_url)
-//	}
-//}
 
 func GenUrlsFromPage(resp *http.Response, err error) (res_urls [][]byte) {
 	re1 := regexp.MustCompile(`http://m.bcoderss.com/wp-content/.+\.jpg`)
