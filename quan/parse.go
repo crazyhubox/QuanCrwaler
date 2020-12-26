@@ -25,6 +25,7 @@ func Rer(start *int, pageNum *int, tag string, client *http.Client, resp_chan ch
 	go func() {
 		for i := *start; i < *pageNum+1; i++ {
 			pageUrl := fmt.Sprintf(`http://m.bcoderss.com/tag/%s/page/%d/`, tag, i)
+			//pageUrl := fmt.Sprintf(`http://m.bcoderss.com/page/%d/?s=%s`, i,tag)
 			resp, err := tools.Request0("POST", pageUrl, client)
 			if err != nil {
 				panic("erro in the page request.")
